@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -16,6 +15,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+
                 script {
                     env.IMAGE_TAG = sh(
                         script: 'git rev-parse --short=12 HEAD',
@@ -29,7 +29,10 @@ pipeline {
             steps {
                 sh '''
                     set -eu
+
                     test -f backend/Dockerfile
+                    test -f backend/package.json
+                    test -f backend/package-lock.json
                     test -f frontend/Dockerfile
                     test -f deployment/kubernetes/backend.yaml
                     test -f deployment/kubernetes/frontend.yaml
@@ -42,10 +45,12 @@ pipeline {
                 sh '''
                     set -eu
 
+                    # Build backend using the project root as context
                     docker build \
                       -t "$DOCKERHUB_REPO:backend-$IMAGE_TAG" \
-                      -f backend/Dockerfile backend
+                      -f backend/Dockerfile .
 
+                    # Build frontend using the frontend directory as context
                     docker build \
                       -t "$DOCKERHUB_REPO:frontend-$IMAGE_TAG" \
                       -f frontend/Dockerfile frontend
@@ -63,9 +68,12 @@ pipeline {
                     )
                 ]) {
                     sh '''
+                        set -eu
                         set +x
+
                         echo "$DOCKER_TOKEN" | docker login \
-                          --username "$DOCKER_USER" --password-stdin
+                          --username "$DOCKER_USER" \
+                          --password-stdin
 
                         docker push "$DOCKERHUB_REPO:backend-$IMAGE_TAG"
                         docker push "$DOCKERHUB_REPO:frontend-$IMAGE_TAG"
@@ -99,10 +107,11 @@ pipeline {
 
     post {
         success {
-            echo 'Build, push and deployment completed successfully.'
+            echo 'Build, push, and deployment completed successfully.'
         }
+
         failure {
-            echo 'Pipeline failed. Check the stage logs before retrying.'
+            echo 'Pipeline failed. Check the console output for the failed stage.'
         }
     }
 }
