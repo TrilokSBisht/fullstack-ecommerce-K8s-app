@@ -3,7 +3,7 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
-const db = require('./db');
+const db = require('../database');
 const authRoutes = require('./routes/auth.routes');
 const oauthRoutes = require('./routes/oauth.routes');
 const productRoutes = require('./routes/products.routes');
@@ -14,12 +14,14 @@ const paymentRoutes = require('./routes/payments.routes');
 const paymentWebhookRoutes = require('./routes/paymentWebhooks.routes');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
-const swaggerDocument = YAML.load('./docs/openapi.yaml');
+const swaggerDocument = YAML.load(
+  path.join(__dirname, '../docs/openapi.yaml')
+);
 
 const app = express();
 
 const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
-const clientDistPath = path.join(__dirname, 'client', 'dist');
+
 
 app.use(cors({
   origin: clientOrigin,
@@ -64,13 +66,5 @@ app.use('/users', userRoutes);
 app.use('/cart', cartRoutes);
 app.use('/orders', orderRoutes);
 app.use('/payments', paymentRoutes);
-
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(clientDistPath));
-
-  app.get(/.*/, (req, res) => {
-    res.sendFile(path.join(clientDistPath, 'index.html'));
-  });
-}
 
 module.exports = app;

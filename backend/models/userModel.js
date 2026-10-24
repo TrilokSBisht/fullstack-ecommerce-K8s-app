@@ -1,4 +1,4 @@
-const db = require('../db');
+const db = require('../../database');
 
 const createUser = async ({ username, email, passwordHash }) => {
   const result = await db.query(

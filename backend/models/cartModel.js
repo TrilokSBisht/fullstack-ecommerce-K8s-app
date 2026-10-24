@@ -1,4 +1,4 @@
-const db = require('../db');
+const db = require('../../database');
 
 const getOrCreateCartByUserId = async (userId) => {
   const existingCart = await db.query(

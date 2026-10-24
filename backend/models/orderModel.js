@@ -1,4 +1,4 @@
-const db = require('../db');
+const db = require('../../database');
 
 const getOrderById = async (id) => {
   const orderResult = await db.query(

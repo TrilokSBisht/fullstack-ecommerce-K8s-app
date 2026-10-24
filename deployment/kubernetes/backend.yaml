@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-backend
+  template:
+    metadata:
+      labels:
+        app: ecommerce-backend
+    spec:
+      containers:
+        - name: backend
+          image: triloksbisht/ecommerece-app:backend-v4
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4001
+          env:
+            - name: PORT
+              value: "4001"
+            - name: NODE_ENV
+              value: production
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-backend-secret
+                  key: DATABASE_URL
+            - name: DB_SSL
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-backend-secret
+                  key: DB_SSL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-backend
+spec:
+  selector:
+    app: ecommerce-backend
+  ports:
+    - port: 4001
+      targetPort: 4001
+  type: ClusterIP
