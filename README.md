@@ -1,4 +1,4 @@
-# Full-Stack E-Commerce App #
+# Full-Stack E-Commerce App 
 
 A full-stack e-commerce application built with React, Node.js, Express, PostgreSQL, Google OAuth, and Stripe Checkout.
 
